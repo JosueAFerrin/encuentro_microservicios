@@ -1,0 +1,123 @@
+version: "3.9"
+services:
+  users_service:
+    build: ./users_service
+    container_name: users_service
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./users_service/.env
+    depends_on:
+      - db_encuentro
+    volumes:
+      - ./users_service:/app
+
+  events_service:
+    build: ./events_service
+    container_name: events_service
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./events_service/.env
+    depends_on:
+      - db_encuentro
+    volumes:
+      - ./events_service:/app
+  
+  purchase_service:
+    build: ./purchase_service
+    container_name: purchase_service
+    ports:
+      - "8002:8002"
+    env_file:
+      - ./purchase_service/.env
+    depends_on:
+      - db_encuentro
+    volumes:
+      - ./purchase_service:/app
+
+  location_service:
+    build: ./location_service
+    container_name: location_service
+    ports:
+      - "8003:8003"
+    env_file:
+      - ./location_service/.env
+    depends_on:
+      - db_encuentro
+    volumes:
+      - ./location_service:/app
+
+  notification_service:
+    build: ./notification_service
+    container_name: notification_service
+    ports:
+      - "8004:8004"
+    env_file:
+      - ./notification_service/.env
+    depends_on:
+      - db_encuentro
+    volumes:
+      - ./notification_service:/app
+
+  api_gateway:
+    build: ./api_gateway
+    container_name: api_gateway
+    ports:
+      - "8005:8005"
+    depends_on:
+      - users_service
+      - events_service
+      - purchase_service
+      - location_service
+      - notification_service
+    volumes:
+      - ./api_gateway:/app
+
+  tickets_service:
+    build: ./tickets_service
+    container_name: tickets_service
+    ports:
+      - "8006:8006"
+    env_file:
+      - ./tickets_service/.env
+    depends_on:
+      - db_encuentro
+    volumes:
+      - ./tickets_service:/app
+
+  payments_service:
+    build: ./payments_service
+    container_name: payments_service
+    ports:
+      - "8007:8007"
+    env_file:
+      - ./payments_service/.env
+    depends_on:
+      - db_encuentro
+    volumes:
+      - ./payments_service:/app
+
+  db_encuentro:
+    image: postgres:15
+    container_name: postgres_encuentro
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: encuentro_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_encuentro_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # para aplicaciones
+      - "15672:15672" # para UI de administración
+
+
+volumes:
+  pg_encuentro_data:
